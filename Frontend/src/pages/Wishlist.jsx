@@ -1,13 +1,12 @@
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import ProductCard from "../components/ProductCard";
-
-const TOY_WISHLIST = [
-  { id: 13, name: "RoboCoder STEM Robot Kit", description: "Build and program a treaded robotic companion with obstacles detection.", price: 4999, image: "https://images.unsplash.com/photo-1546776310-eef45dd6d63c?auto=format&fit=crop&w=600&q=80" },
-  { id: 10, name: "Snap Circuit Explorer", description: "Electronic puzzle board to build working alarms, radios, and light matrices.", price: 1999, image: "https://images.unsplash.com/photo-1563770660941-20978e870e26?auto=format&fit=crop&w=600&q=80" }
-];
+import { useCart } from "../context/CartContext";
+import { useWishlist } from "../context/WishlistContext";
 
 export default function Wishlist() {
+  const { addToCart } = useCart();
+  const { items, toggleWishlist } = useWishlist();
   return (
     <>
       <Navbar />
@@ -17,14 +16,14 @@ export default function Wishlist() {
           <p className="text-muted">Toys saved for birthday or holiday gifts</p>
         </div>
 
-        {TOY_WISHLIST.length > 0 ? (
+        {items.length > 0 ? (
           <div className="grid grid-cols-4 gap-6 anim-fadein-up">
-            {TOY_WISHLIST.map(p => (
+            {items.map(p => (
               <ProductCard
                 key={p.id}
                 product={p}
-                onAddToCart={() => alert(`Added ${p.name} to cart!`)}
-                onAddToWishlist={() => alert(`Already in wishlist.`)}
+                onAddToCart={() => addToCart(p, 1)}
+                onAddToWishlist={() => toggleWishlist(p)}
               />
             ))}
           </div>

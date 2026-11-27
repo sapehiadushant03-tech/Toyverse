@@ -4,6 +4,9 @@ import jwt from 'jsonwebtoken';
 
 // Generate JWT Token
 const generateToken = (userId) => {
+  if (!process.env.JWT_SECRET) {
+    throw new Error("JWT_SECRET is not configured");
+  }
   return jwt.sign(
     { userId, timestamp: Date.now() },
     process.env.JWT_SECRET,
@@ -14,15 +17,13 @@ const generateToken = (userId) => {
 export const signup = async (req, res, next) => {
   try {
     const { userName, email, password } = req.body;
-    const normalizedEmail = email.trim().toLowerCase();
-    const normalizedUserName = userName.trim();
-
-    // Double-check validation (middleware should catch, but defense in depth)
-    if (!userName || !email || !password) {
+    if (!userName?.trim() || !email?.trim() || !password) {
       return res.status(400).json({
         message: "All fields are required",
       });
     }
+    const normalizedEmail = email.trim().toLowerCase();
+    const normalizedUserName = userName.trim();
 
     // Check if user already exists
     const isUserExist = await Auth.findOne({ email: normalizedEmail });

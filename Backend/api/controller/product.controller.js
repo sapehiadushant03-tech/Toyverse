@@ -20,3 +20,26 @@ export const getProductsByCategory = async (req, res, next) => {
     });
   }
 };
+
+export const getProductById = async (req, res, next) => {
+  try {
+    const product = await Product.findById(req.params.id).lean();
+
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    return res.status(200).json({
+      message: "Product fetched successfully",
+      data: product,
+    });
+  } catch (error) {
+    if (error?.name === "CastError") {
+      return res.status(404).json({ message: "Product not found" });
+    }
+    console.error("Product detail error:", error);
+    return res.status(500).json({
+      message: "Failed to fetch product. Please try again.",
+    });
+  }
+};

@@ -27,7 +27,4 @@ const authSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Index for faster email lookups
-authSchema.index({ email: 1 });
-
 export const Auth = mongoose.model("Auth", authSchema);

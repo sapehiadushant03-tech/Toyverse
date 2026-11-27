@@ -1,6 +1,7 @@
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { useAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 
 const TOY_ORDERS = [
@@ -9,7 +10,13 @@ const TOY_ORDERS = [
 ];
 
 export default function Profile() {
-  const {user, loading} = useAuth();
+  const {user, logoutUser} = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logoutUser();
+    navigate("/signin");
+  };
   return (
     <>
       <Navbar />
@@ -30,9 +37,9 @@ export default function Profile() {
                 </a>
               ))}
               <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid var(--color-border)' }}>
-                <a href="/signin" className="profile-nav-link" style={{ color: '#ef4444' }}>
+                <button onClick={handleLogout} className="profile-nav-link" style={{ color: '#ef4444', width: '100%', border: 0, background: 'transparent', textAlign: 'left' }}>
                   <span>↩</span> Sign Out
-                </a>
+                </button>
               </div>
             </div>
           </div>

@@ -1,5 +1,6 @@
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import { useState } from "react";
 
 const FAQ = [
   { q: "Are your toys non-toxic and child-safe?", a: "Absolutely. All our toys are EN71 & ASTM certified, meaning they are manufactured using non-toxic water-based finishes, organic wood, and BPA-free plastics." },
@@ -8,6 +9,7 @@ const FAQ = [
 ];
 
 export default function Contact() {
+  const [sent, setSent] = useState(false);
   return (
     <>
       <Navbar />
@@ -29,7 +31,8 @@ export default function Contact() {
           {/* Form */}
           <div className="card anim-fadein-up" style={{ padding: '3rem' }}>
             <h2 style={{ fontFamily: "'Playfair Display',serif", fontSize: '1.75rem', fontWeight: 700, marginBottom: '2rem' }}>Send a Message</h2>
-            <form onSubmit={e => { e.preventDefault(); alert('Message sent! We\'ll be in touch shortly.'); }}>
+            {sent && <div className="text-muted" style={{ marginBottom: "1.5rem", color: "#10b981" }}>Message received. ToyVerse Care will be in touch shortly.</div>}
+            <form onSubmit={e => { e.preventDefault(); e.currentTarget.reset(); setSent(true); }}>
               <div className="grid grid-cols-2 gap-4">
                 <div className="form-group">
                   <label className="form-label">First Name</label>

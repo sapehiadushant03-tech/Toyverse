@@ -1,11 +1,43 @@
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { useCart } from "../context/CartContext";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 export default function Cart() {
   const { items, removeFromCart, updateQuantity, subtotal } = useCart();
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+  const [promoCode, setPromoCode] = useState("");
+  const [discount, setDiscount] = useState(0);
+  const [checkoutMessage, setCheckoutMessage] = useState("");
   const shipping = subtotal > 999 ? 0 : 99;
-  const total = subtotal + shipping;
+  const tax = Math.round(subtotal * 0.18);
+  const discountedSubtotal = subtotal - discount;
+  const total = discountedSubtotal + shipping + tax;
+
+  const applyPromo = () => {
+    if (promoCode.trim().toUpperCase() === "PLAY20" && subtotal > 0) {
+      setDiscount(Math.round(subtotal * 0.20));
+      setCheckoutMessage("PLAY20 applied successfully.");
+    } else {
+      setDiscount(0);
+      setCheckoutMessage("Enter a valid promotion code.");
+    }
+  };
+
+  const handleCheckout = () => {
+    if (!items.length) {
+      setCheckoutMessage("Add at least one toy before checkout.");
+      return;
+    }
+    if (!isAuthenticated) {
+      navigate("/signin");
+      return;
+    }
+    setCheckoutMessage("Your demo order is ready for checkout. Payment integration can be connected securely next.");
+  };
 
   return (
     <>
@@ -60,23 +92,24 @@ export default function Cart() {
               </div>
               <div className="summary-row">
                 <span>Tax (18% GST)</span>
-                <span>₹{Math.round((subtotal || 0) * 0.18).toLocaleString('en-IN')}</span>
+                <span>₹{tax.toLocaleString('en-IN')}</span>
               </div>
               <div className="divider"></div>
               <div className="summary-total">
                 <span>Total</span>
-                <span className="summary-total-price">₹{((total || 0) + Math.round((subtotal || 0) * 0.18)).toLocaleString('en-IN')}</span>
+                <span className="summary-total-price">₹{total.toLocaleString('en-IN')}</span>
               </div>
 
               <div style={{ padding: '1.25rem 0', marginBottom: '1rem' }}>
                 <div className="form-group" style={{ marginBottom: 0 }}>
                   <div className="flex gap-2">
-                    <input type="text" className="form-input" placeholder="Promo code" />
-                    <button className="btn btn-ghost">Apply</button>
+                    <input type="text" className="form-input" placeholder="Promo code" value={promoCode} onChange={(event) => setPromoCode(event.target.value)} />
+                    <button type="button" className="btn btn-ghost" onClick={applyPromo}>Apply</button>
                   </div>
                 </div>
               </div>
-              <button className="btn btn-primary w-full btn-lg">
+              {checkoutMessage && <p className="text-muted text-center" style={{ marginBottom: "1rem" }}>{checkoutMessage}</p>}
+              <button className="btn btn-primary w-full btn-lg" onClick={handleCheckout}>
                 Proceed to Checkout →
               </button>
               <p className="text-muted text-center" style={{ fontSize: '0.8rem', marginTop: '1rem' }}>

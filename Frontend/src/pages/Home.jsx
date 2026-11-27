@@ -4,19 +4,15 @@ import Hero from "../components/Hero";
 import CategoryCard from "../components/CategoryCard";
 import ProductCard from "../components/ProductCard";
 import { useCart } from "../context/CartContext";
+import { useEffect, useState } from "react";
+import { getProductsWithoutAuth } from "../services/productServices";
+import { useWishlist } from "../context/WishlistContext";
 
 const TOY_CATEGORIES = [
   { id:"0-2", name:"Little Explorers", count:"1,200", image:"https://images.unsplash.com/photo-1515488042361-404e9250afef?auto=format&fit=crop&w=700&q=85" },
   { id:"3-5", name:"Big Imaginations", count:"3,400", image:"https://images.unsplash.com/photo-1587654780291-39c9404d746b?auto=format&fit=crop&w=700&q=85" },
   { id:"6-8", name:"Builders Club", count:"2,900", image:"https://images.unsplash.com/photo-1513364776144-60967b0f800f?auto=format&fit=crop&w=700&q=85" },
   { id:"9-plus", name:"Future Makers", count:"1,800", image:"https://images.unsplash.com/photo-1531346878377-a5be20888e57?auto=format&fit=crop&w=700&q=85" }
-];
-
-const TRENDING_TOYS = [
-  { id:1,name:"RoboCoder STEM Kit",description:"Build, code and bring a smart robot to life.",price:4999,badge:"Bestseller",image:"https://images.unsplash.com/photo-1546776310-eef45dd6d63c?auto=format&fit=crop&w=700&q=85" },
-  { id:2,name:"Magnetic Dream Castle",description:"A 60-piece set for wildly colourful creations.",price:3299,badge:"New",image:"https://images.unsplash.com/photo-1587654780291-39c9404d746b?auto=format&fit=crop&w=700&q=85" },
-  { id:3,name:"Wooden Marble Run",description:"Gravity-powered, hands-on engineering.",price:2499,image:"https://images.unsplash.com/photo-1596461404969-9ae70f2830c1?auto=format&fit=crop&w=700&q=85" },
-  { id:4,name:"Solar System Lab",description:"Paint, build and explore our cosmic neighbours.",price:1899,image:"https://images.unsplash.com/photo-1603302576837-37561b2e2302?auto=format&fit=crop&w=700&q=85" }
 ];
 
 const SAFETY_PROMISES = [
@@ -28,6 +24,23 @@ const SAFETY_PROMISES = [
 
 export default function Home() {
   const { addToCart } = useCart();
+  const { toggleWishlist } = useWishlist();
+  const [trendingToys, setTrendingToys] = useState([]);
+  const [newsletterEmail, setNewsletterEmail] = useState("");
+  const [newsletterMessage, setNewsletterMessage] = useState("");
+
+  useEffect(() => {
+    getProductsWithoutAuth()
+      .then((response) => {
+        const products = (response.data.data || []).slice(0, 4).map((product) => ({
+          ...product,
+          id: product._id,
+          description: product.description || product.desc,
+        }));
+        setTrendingToys(products);
+      })
+      .catch(() => setTrendingToys([]));
+  }, []);
   return (
     <>
       <Navbar />
@@ -72,8 +85,8 @@ export default function Home() {
             <a href="/category/9-plus" className="btn btn-ghost">Explore collection →</a>
           </div>
           <div className="grid grid-cols-4 gap-6">
-            {TRENDING_TOYS.map(toy => (
-              <ProductCard key={toy.id} product={toy} onAddToCart={() => addToCart(toy,1)} onAddToWishlist={() => alert(`Added ${toy.name} to wishlist!`)}/>
+            {trendingToys.map((toy) => (
+              <ProductCard key={toy.id} product={toy} onAddToCart={() => addToCart(toy, 1)} onAddToWishlist={() => toggleWishlist(toy)} />
             ))}
           </div>
         </section>
@@ -96,9 +109,17 @@ export default function Home() {
             <h2 className="section-title">Good play, delivered.</h2>
             <p className="text-muted" style={{marginTop:"12px"}}>Fresh finds, play ideas and members-only drops.</p>
             <div className="newsletter-input-group">
-              <input type="email" className="form-input" placeholder="Email address" />
-              <button className="btn btn-dark">Join the list</button>
+              <input type="email" className="form-input" placeholder="Email address" value={newsletterEmail} onChange={(event) => setNewsletterEmail(event.target.value)} />
+              <button className="btn btn-dark" type="button" onClick={() => {
+                if (!newsletterEmail.includes("@")) {
+                  setNewsletterMessage("Please enter a valid email address.");
+                } else {
+                  setNewsletterMessage("You're on the ToyVerse list!");
+                  setNewsletterEmail("");
+                }
+              }}>Join the list</button>
             </div>
+            {newsletterMessage && <p className="text-muted" style={{ marginTop: "1rem" }}>{newsletterMessage}</p>}
           </div>
         </section>
       </main>

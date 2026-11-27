@@ -1,46 +1,57 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { useCart } from "../context/CartContext";
-
-const TOY_DATABASE = {
-  1: {
-    name: "RoboCoder STEM Robot Kit",
-    price: 4999,
-    originalPrice: 5999,
-    description: "Introduce your child to code, engineering, and artificial intelligence with our award-winning treaded robot. Designed by developmental specialists, this kit comes with snap-together blocks, electric motors, and a scratch-based drag-and-drop mobile programming interface.",
-    features: ["BPA-Free Durable Shell", "Scratch-based Visual Block Programming", "Obstacle Detection Sensors", "USB Rechargeable Motors", "Ages 9+ Recommended"],
-    images: [
-      "https://images.unsplash.com/photo-1546776310-eef45dd6d63c?auto=format&fit=crop&w=1000&q=80",
-      "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=1000&q=80",
-      "https://images.unsplash.com/photo-1531346878377-a5be20888e57?auto=format&fit=crop&w=1000&q=80"
-    ],
-    rating: 4.9,
-    reviews: 1422,
-  }
-};
-
-const FALLBACK_TOY = {
-  name: "Classic Wooden Puzzle & Block Set",
-  price: 1499,
-  originalPrice: 1999,
-  description: "A premium set of child-safe geometric wooden building blocks designed to improve color coordination, creative spatial imagination, and fine motor skills. Handcrafted from organic rubberwood.",
-  features: ["100% Organic Rubberwood", "Water-based Non-toxic Dyes", "Sanded Smooth Edges", "Ages 3+ Recommended"],
-  images: [
-    "https://images.unsplash.com/photo-1515488042361-404e9250afef?auto=format&fit=crop&w=1000&q=80",
-    "https://images.unsplash.com/photo-1587654780291-39c9404d746b?auto=format&fit=crop&w=1000&q=80"
-  ],
-  rating: 4.8,
-  reviews: 955,
-};
+import { getProductById } from "../services/productServices";
+import { useWishlist } from "../context/WishlistContext";
 
 export default function ProductDetail() {
   const { id } = useParams();
-  const product = TOY_DATABASE[id] || FALLBACK_TOY;
   const [activeImg, setActiveImg] = useState(0);
   const [qty, setQty] = useState(1);
+  const [product, setProduct] = useState(null);
+  const [notFound, setNotFound] = useState(false);
   const { addToCart } = useCart();
+  const { toggleWishlist, isSaved } = useWishlist();
+
+  useEffect(() => {
+    setNotFound(false);
+    getProductById(id)
+      .then((response) => setProduct({
+        ...response.data.data,
+        id: response.data.data._id,
+        description: response.data.data.description || response.data.data.desc,
+        images: response.data.data.images?.length ? response.data.data.images : [response.data.data.image],
+        originalPrice: response.data.data.originalPrice || Math.round(response.data.data.price * 1.2),
+        features: response.data.data.features?.length ? response.data.data.features : ["Child-safe design", "Development expert approved"],
+        rating: response.data.data.rating || 4.8,
+        reviews: response.data.data.reviews || 0,
+      }))
+      .catch((error) => {
+        if (error.response?.status === 404) setNotFound(true);
+      });
+  }, [id]);
+
+  if (notFound) {
+    return (
+      <>
+        <Navbar />
+        <div className="page-wrapper container"><h1>Product not found</h1></div>
+        <Footer />
+      </>
+    );
+  }
+
+  if (!product) {
+    return (
+      <>
+        <Navbar />
+        <div className="page-wrapper container"><p className="text-muted">Loading product...</p></div>
+        <Footer />
+      </>
+    );
+  }
 
   const stars = Array.from({ length: 5 }, (_, i) =>
     i < Math.floor(product.rating) ? "★" : "☆"
@@ -111,7 +122,9 @@ export default function ProductDetail() {
               <button className="btn btn-primary" style={{ flex: 1 }} onClick={() => addToCart({ ...product, id: Number(id) || product.name }, qty)}>
                 Add to Cart
               </button>
-              <button className="btn-icon" title="Wishlist" onClick={() => alert('Saved to wishlist!')}>♡</button>
+              <button className="btn-icon" title={isSaved(product.id) ? "Remove from wishlist" : "Add to wishlist"} onClick={() => toggleWishlist(product)}>
+                {isSaved(product.id) ? "♥" : "♡"}
+              </button>
             </div>
             <button className="btn btn-ghost w-full">Buy Now — Instant Checkout</button>
           </div>

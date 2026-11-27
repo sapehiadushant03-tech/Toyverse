@@ -38,15 +38,17 @@ export default function Footer() {
           </div>
           <div>
             <div className="footer-col-title">About Us</div>
-            {["Our Story", "Pedagogy & Design", "Safety Protocols", "Parent Reviews", "Press & Awards"].map(l => (
-              <a key={l} href="#" className="footer-link">{l}</a>
-            ))}
+            <span className="footer-link">Our Story</span>
+            <span className="footer-link">Pedagogy & Design</span>
+            <span className="footer-link">Safety Protocols</span>
+            <span className="footer-link">Parent Reviews</span>
           </div>
           <div>
             <div className="footer-col-title">Support</div>
-            {["Parent Helpdesk", "Track Gift Order", "Easy Replacements", "FAQ", "Shipping Policy"].map(l => (
-              <a key={l} href="#" className="footer-link">{l}</a>
-            ))}
+            <Link to="/contact" className="footer-link">Parent Helpdesk</Link>
+            <Link to="/cart" className="footer-link">Track Gift Order</Link>
+            <Link to="/contact" className="footer-link">Easy Replacements</Link>
+            <Link to="/contact" className="footer-link">FAQ</Link>
           </div>
         </div>
         <div className="footer-bottom">

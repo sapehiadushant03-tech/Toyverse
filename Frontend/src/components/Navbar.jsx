@@ -1,16 +1,15 @@
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
 
 export default function Navbar() {
   const location = useLocation();
-  const navigate = useNavigate();
   const [scrolled, setScrolled] = useState(false);
   const [theme, setTheme] = useState(() => {
     return localStorage.getItem("theme") || "light";
   });
-  const { user, loading } = useAuth();
+  const { user } = useAuth();
   const { itemCount } = useCart();
 
   useEffect(() => {

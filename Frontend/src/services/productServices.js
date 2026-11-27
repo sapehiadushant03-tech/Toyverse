@@ -22,3 +22,8 @@ export const getProductsWithoutAuth = async (selectedCategory) => {
     throw error;
   }
 };
+
+export const getProductById = async (id) => {
+  const response = await apiClient.get(`/api/products/${encodeURIComponent(id)}`);
+  return response;
+};

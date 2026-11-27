@@ -2,6 +2,9 @@ import jwt from 'jsonwebtoken';
 
 export const verifyToken = async (req, res, next) => {
   try {
+    if (!process.env.JWT_SECRET) {
+      return res.status(500).json({ message: "Authentication is not configured" });
+    }
     const token = req.headers.authorization?.split(' ')[1]; // Bearer token
     
     if (!token) {

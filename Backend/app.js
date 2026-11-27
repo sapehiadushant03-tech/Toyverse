@@ -15,9 +15,20 @@ dotenv.config({ path: fileURLToPath(new URL("./.env", import.meta.url)) });
 app.use(helmet()); // Set security headers
 
 // CORS with environment variable
-const allowedOrigins = process.env.CORS_ORIGIN || "http://localhost:5173";
+const allowedOrigins = (
+  process.env.CORS_ORIGIN ||
+  process.env.FRONTEND_URL ||
+  "http://localhost:5173"
+)
+  .split(",")
+  .map((origin) => origin.trim());
 app.use(cors({ 
-  origin: allowedOrigins,
+  origin(origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    return callback(new Error("Origin not allowed by CORS"));
+  },
   credentials: true, // Allow cookies
 }));
 

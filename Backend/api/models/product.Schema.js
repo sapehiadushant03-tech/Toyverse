@@ -12,6 +12,10 @@ const productSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
+    description: {
+      type: String,
+      trim: true,
+    },
     category: {
       type: String,
       required: true,
@@ -21,7 +25,15 @@ const productSchema = new mongoose.Schema(
       type: Number,
       required: true,
       trim: true,
+      min: 0,
     },
+    originalPrice: { type: Number, min: 0 },
+    badge: { type: String, trim: true },
+    image: { type: String, trim: true },
+    images: [{ type: String, trim: true }],
+    features: [{ type: String, trim: true }],
+    rating: { type: Number, min: 0, max: 5, default: 0 },
+    reviews: { type: Number, min: 0, default: 0 },
   },
   { timestamps: true },
 );
